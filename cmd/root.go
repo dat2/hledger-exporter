@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"regexp"
+	"sort"
 	"strings"
 	"time"
 
@@ -157,6 +158,10 @@ var rootCmd = &cobra.Command{
 			}
 			hledgerTransactions = append(hledgerTransactions, hledgerTransaction)
 		}
+
+		sort.Slice(hledgerTransactions, func (i, j int) bool {
+			return hledgerTransactions[i].Date.Before(hledgerTransactions[j].Date)
+		})
 
 		for _, transaction := range hledgerTransactions {
 			fmt.Printf("%s\n\n", transaction)
