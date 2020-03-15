@@ -2,14 +2,14 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/markbates/pkger"
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/spf13/cobra"
 	"html/template"
+	"io/ioutil"
 	"log"
 	"net/http"
 )
-
-var updateTemplate = template.Must(template.ParseFiles("cmd/update.html"))
 
 func NewPlaidCmd(config *Config) *cobra.Command {
 	return &cobra.Command{
@@ -24,6 +24,7 @@ func NewPlaidCmd(config *Config) *cobra.Command {
 				plaid.Development,
 				&http.Client{},
 			}
+
 			client, err := plaid.NewClient(clientOptions)
 			if err != nil {
 				return fmt.Errorf("Failed to initialize plaid client: %w", err)
@@ -33,6 +34,23 @@ func NewPlaidCmd(config *Config) *cobra.Command {
 			resp, err := client.CreatePublicToken(config.PlaidAccessToken)
 			if err != nil {
 				return fmt.Errorf("Failed to create a public token: %w", err)
+			}
+
+			// load and parse template
+			f, err := pkger.Open("/templates/update.html")
+			if err != nil {
+				return err
+			}
+			defer f.Close()
+
+			contents, err := ioutil.ReadAll(f)
+			if err != nil {
+				return err
+			}
+
+			updateTemplate, err := template.New("update.html").Parse(string(contents))
+			if err != nil {
+				return err
 			}
 
 			// render the template
