@@ -81,18 +81,25 @@ func NewExportCmd(config *Config) *cobra.Command {
 			// loop through all transactions in the page
 			transactions := make([]plaid.Transaction, 0)
 			totalTransactions := 0
-			fetchedTransactions := 0
+			offset := 0
 			for {
-				page, err := client.GetTransactions(config.PlaidAccessToken, startDate.Format("2006-01-02"), endDate.Format("2006-01-02"))
+				page, err := client.GetTransactionsWithOptions(config.PlaidAccessToken,
+					plaid.GetTransactionsOptions{
+						StartDate:  startDate.Format("2006-01-02"),
+						EndDate:    endDate.Format("2006-01-02"),
+						AccountIDs: []string{},
+						Count:      100,
+						Offset:     offset,
+					})
 				if err != nil {
 					return fmt.Errorf("Failed to load transactions: %w", err)
 				}
 				if totalTransactions == 0 {
 					totalTransactions = page.TotalTransactions
 				}
-				fetchedTransactions += len(page.Transactions)
+				offset += len(page.Transactions)
 				transactions = append(transactions, page.Transactions...)
-				if fetchedTransactions >= totalTransactions {
+				if offset >= totalTransactions {
 					break
 				}
 			}
