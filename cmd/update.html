@@ -1,0 +1,30 @@
+<html>
+  <body>
+    <button id="link-button">Link Account</button>
+    <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
+    <script>
+    var linkHandler = Plaid.create({
+      env: 'development',
+      clientName: 'Hledger-Exporter',
+      key: '{{ .PlaidClientID }}',
+      product: ['transactions'],
+      token: '{{ .PlaidPublicToken }}',
+      onSuccess: function(public_token, metadata) {
+        console.log('success');
+      },
+      onExit: function(err, metadata) {
+        if (err != null) {
+          console.error(err);
+        }
+      }
+    });
+    // Trigger the authentication view
+    document.getElementById('link-button').onclick = function() {
+      // Link will automatically detect the institution ID
+      // associated with the public token and present the
+      // credential view to your user.
+      linkHandler.open();
+    };
+    </script>
+  </body>
+</html>
