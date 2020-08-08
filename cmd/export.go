@@ -69,7 +69,6 @@ func NewExportCmd(config *Config) *cobra.Command {
 			clientOptions := plaid.ClientOptions{
 				config.PlaidClientID,
 				config.PlaidSecret,
-				config.PlaidPublicKey,
 				plaid.Development,
 				&http.Client{},
 			}
